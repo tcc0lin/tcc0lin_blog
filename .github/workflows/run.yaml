@@ -29,4 +29,6 @@ jobs:
         with:
           github_token: ${{ secrets.GH_PAGE_ACTION_TOKEN }}
           publish_dir: ./public
+          EXTERNAL_REPOSITORY: tcc0lin/tcc0lin.github.io
+          PUBLISH_BRANCH: main
           commit_message: ${{ github.event.head_commit.message }}
