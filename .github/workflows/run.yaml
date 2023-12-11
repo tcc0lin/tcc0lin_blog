@@ -27,7 +27,8 @@ jobs:
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GH_PAGE_ACTION_TOKEN }}
+          # github_token: ${{ secrets.GH_PAGE_ACTION_TOKEN }}
+          personal_token: ${{ secrets.GH_PAGE_ACTION_TOKEN }}
           publish_dir: ./public
           EXTERNAL_REPOSITORY: tcc0lin/tcc0lin.github.io
           PUBLISH_BRANCH: main
