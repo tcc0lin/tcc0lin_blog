@@ -1,10 +1,10 @@
 ---
-title:"Art方法调用流程分析"
-date:2024-03-01T19:51:22+08:00
-draft:true
-author:"tcc0lin"
-tags:["源码分析"]
-categories:["Android"]
+title: "Art方法调用流程分析"
+date: 2024-03-01T19:51:22+08:00
+draft: true
+author: "tcc0lin"
+tags: ["源码分析"]
+categories: ["Android"]
 ---
 
 ### 一、关于JavaVM
