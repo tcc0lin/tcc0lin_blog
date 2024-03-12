@@ -385,3 +385,149 @@ Gadget启动时会根据指定路径去搜索配置文件，默认配置文件�
 - script: 启动后直接加载指定的JavaScript文件
 - script-directory: 启动后加载指定目录下的所有JavaScript文件
 ### 三、ART Hook
+frida对于ART Hook的实现在项目frida-java-bridge中，在ART虚拟机中，对于方法的调用，大部分会调用到ArtMethod::Invoke
+```c
+void ArtMethod::Invoke(Thread* self, uint32_t* args, uint32_t args_size, JValue* result, const char* shorty) {
+    if (UNLIKELY(!runtime->IsStarted() || (self->IsForceInterpreter() && !IsNative() && !IsProxyMethod() && IsInvokable()))) {
+        if (IsStatic()) {
+            art::interpreter::EnterInterpreterFromInvoke(
+                self, this, nullptr, args, result, /*stay_in_interpreter=*/ true);
+        } else {
+            mirror::Object* receiver = reinterpret_cast<StackReference<mirror::Object>*>(&args[0])->AsMirrorPtr();
+            art::interpreter::EnterInterpreterFromInvoke(self, this, receiver, args + 1, result, /*stay_in_interpreter=*/ true);
+        }
+  } else {
+    if (!IsStatic()) {
+        (*art_quick_invoke_stub)(this, args, args_size, self, result, shorty);
+    } else {
+        (*art_quick_invoke_static_stub)(this, args, args_size, self, result, shorty);
+    }
+  }
+}
+```
+主要分为两种情况
+- 一种是ART未初始化完成或者系统配置强制以解释模式运行，此时则进入解释器
+- 另一种情况是有native代码时，比如JNI代码、OAT提前编译过的代码或者JIT运行时编译过的代码以及代理方法等，此时则直接跳转到invoke_stub去执行
+对于解释执行的情况，也细分为两种情况，一种是真正的解释执行，不断循环解析CodeItem中的每条指令并进行解析；另外一种是在当前解释执行遇到native方法时，这种情况一般是遇到了JNI函数，这时则通过method->GetEntryPointFromJni()获取对应地址进行跳转
+```c
+class ArtMethod final {
+// ...
+struct PtrSizedFields {
+    // Depending on the method type, the data is
+    //   - native method: pointer to the JNI function registered to this method
+    //                    or a function to resolve the JNI function,
+    //   - resolution method: pointer to a function to resolve the method and
+    //                        the JNI function for @CriticalNative.
+    //   - conflict method: ImtConflictTable,
+    //   - abstract/interface method: the single-implementation if any,
+    //   - proxy method: the original interface method or constructor,
+    //   - other methods: during AOT the code item offset, at runtime a pointer
+    //                    to the code item.
+    void* data_;
+
+    // Method dispatch from quick compiled code invokes this pointer which may cause bridging into
+    // the interpreter.
+    void* entry_point_from_quick_compiled_code_;
+} ptr_sized_fields_;
+// ...
+};
+```
+对于快速执行的模式是跳转到stub代码，以非静态方法为例，该stub定义在art/runtime/arch/arm64/quick_entrypoints_arm64.S文件中，大致作用是将参数保存在对应寄存器中，然后跳转到实际的地址执行
+```s
+.macro INVOKE_STUB_CALL_AND_RETURN
+
+    REFRESH_MARKING_REGISTER
+    REFRESH_SUSPEND_CHECK_REGISTER
+
+    // load method-> METHOD_QUICK_CODE_OFFSET
+    ldr x9, [x0, #ART_METHOD_QUICK_CODE_OFFSET_64]
+    // Branch to method.
+    blr x9
+
+    // Pop the ArtMethod* (null), arguments and alignment padding from the stack.
+    mov sp, xFP
+    // ...
+.endm
+```
+而ART_METHOD_QUICK_CODE_OFFSET_64对应的就是entry_point_from_quick_compiled_code_
+
+因此，不管是解释模式还是其他模式，只要目标方法有native代码，那么该方法的代码地址都是会保存在entry_point_from_quick_compiled_code_字段，只不过这个字段的含义在不同的场景中略有不同
+
+所以我们若想要实现ARTHook，理论上只要找到对应方法在内存中的ArtMethod地址，然后替换其entrypoint的值即可。但是前面说过，并不是所有方法都会走到ArtMethod::Invoke。比如对于系统函数的调用，OAT优化时会直接将对应系统函数方法的调用替换为汇编跳转，跳转的目的就是就是对应方法的entrypoint，因为boot.oat由zygote加载，对于所有应用而言内存地址都是固定的，因此ART可以在优化过程中省略方法的查找过程从而直接跳转
+
+再回到frida，对于ART Hook的实现在ArtMethodMangler当中
+```js
+// lib/android.js
+
+patchArtMethod(replacementMethodId, {
+    jniCode: impl,
+    accessFlags: ((originalFlags & ~(kAccCriticalNative | kAccFastNative | kAccNterpEntryPointFastPathFlag)) | kAccNative | kAccCompileDontBother) >>> 0,
+    quickCode: api.artClassLinker.quickGenericJniTrampoline,
+    interpreterCode: api.artInterpreterToCompiledCodeBridge
+}, vm);
+```
+jniCode替换为用户封装而成的NativeFunction，并将accessFlags设置成kAccNative，即这是一个JNI方法。quickCode和interpreterCode分别是Quick模式和解释器模式的入口，替换为了上文中查找保存的trampoline，令Quick模式跳转到JNI入口，解释器模式跳转到Quick代码，这样就实现了该方法的拦截，每次执行都会当做JNI函数执行到jniCode即我们替换的代码中
+
+虽然此时我们已经将目标ArtMethod改成了Native方法，且JNI的入口指向我们的hook函数，但如果该方法已经被OAT或者JIT优化成了二进制代码，此时在字节码层调用invoke-xxx时会通过方法的entry_point_from_quick_compiled_code_直接跳转到native代码执行，而不是quick_xxx_trampoline。
+
+因此对于这种情况，我们可以将entrypoint的地址重新指向trampoline，但如前文所说，对于系统函数而言，其地址已知，因此调用方被优化后很可能直接就调转到了对应的native地址，而不会通过entrypoint去查找。因此frida采用的方法是直接修改目标方法的quickCode内容，将其替换为一段跳板代码，然后再间接跳转到我们的劫持实现中
+```js
+Memory.patchCode(trampoline, 256, code => {
+    const writer = new Arm64Writer(code, { pc: trampoline });
+
+    const relocator = new Arm64Relocator(address, writer);
+    for (let i = 0; i !== 2; i++) {
+      relocator.readOne();
+    }
+    relocator.writeAll();
+
+    relocator.readOne();
+    relocator.skipOne();
+    writer.putBCondLabel('eq', 'runtime_or_replacement_method');
+
+    const savedRegs = [
+      'd0', 'd1',
+      'd2', 'd3',
+      'd4', 'd5',
+      'd6', 'd7',
+      'x0', 'x1',
+      'x2', 'x3',
+      'x4', 'x5',
+      'x6', 'x7',
+      'x8', 'x9',
+      'x10', 'x11',
+      'x12', 'x13',
+      'x14', 'x15',
+      'x16', 'x17'
+    ];
+    const numSavedRegs = savedRegs.length;
+
+    for (let i = 0; i !== numSavedRegs; i += 2) {
+      writer.putPushRegReg(savedRegs[i], savedRegs[i + 1]);
+    }
+
+    writer.putCallAddressWithArguments(artController.replacedMethods.isReplacement, [methodReg]);
+    writer.putCmpRegReg('x0', 'xzr');
+
+    for (let i = numSavedRegs - 2; i >= 0; i -= 2) {
+      writer.putPopRegReg(savedRegs[i], savedRegs[i + 1]);
+    }
+
+    writer.putBCondLabel('ne', 'runtime_or_replacement_method');
+    writer.putBLabel('regular_method');
+
+    relocator.readOne();
+    const tailInstruction = relocator.input;
+
+    const tailIsRegular = tailInstruction.address.equals(target.whenRegularMethod);
+
+    writer.putLabel(tailIsRegular ? 'regular_method' : 'runtime_or_replacement_method');
+    relocator.writeOne();
+    writer.putBranchAddress(tailInstruction.next);
+
+    writer.putLabel(tailIsRegular ? 'runtime_or_replacement_method' : 'regular_method');
+    writer.putBranchAddress(target.whenTrue);
+
+    writer.flush();
+});
+```
