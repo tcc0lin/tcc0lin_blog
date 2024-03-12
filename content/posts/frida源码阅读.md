@@ -1,6 +1,6 @@
 ---
 title: "Frida源码阅读"
-date: 2024-03-12T13:37:48+08:00
+date: 2023-03-12T13:37:48+08:00
 draft: true
 author: "tcc0lin"
 tags: ["源码分析"]
