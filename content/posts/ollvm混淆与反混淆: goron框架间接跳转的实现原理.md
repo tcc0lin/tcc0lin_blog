@@ -1,5 +1,5 @@
 ---
-title: "Ollvm混淆与反混淆: 间接跳转的实现原理"
+title: "Ollvm混淆与反混淆: goron框架间接跳转的实现原理"
 date: 2023-03-30T11:48:20+08:00
 draft: true
 author: "tcc0lin"
@@ -163,6 +163,11 @@ for (auto &BB : Fn) {
       }
     }
 ```
+#### 1.5 效果分析
+![](https://github.com/tcc0lin/self_pic/blob/main/indbr1.png?raw=true)
+- w12为后继块的index
+- x8为全局变量+index-enckey后的地址
+- br x8完成对后继块的跳转
 ### 二、总结
 根据对代码的分析，可以简述间接跳转的原理
 1. 收集末尾块的指令对应的后继块，形成map，map包含块以及对应的index
