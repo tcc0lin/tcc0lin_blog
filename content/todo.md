@@ -4,10 +4,5 @@ date: 2023-08-08T19:51:24+08:00
 draft: true
 ---
 
-- dobby
-- jnitrace
-- lsposed
-    - lsplant
-    - lspatch
-- frida
-- sandhook
+- ebpf工具
+- 环境检测工具
