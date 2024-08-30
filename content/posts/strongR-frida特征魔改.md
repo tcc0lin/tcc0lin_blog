@@ -1,5 +1,5 @@
 ---
-title: "StrongR Frid特征魔改"
+title: "StrongR Frida特征魔改"
 date: 2023-08-01T18:30:58+08:00
 # draft: true
 draft: false
