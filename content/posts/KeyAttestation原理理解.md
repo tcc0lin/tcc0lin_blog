@@ -2,8 +2,8 @@
 title: "KeyAttestation原理理解"
 date: 2024-08-30T23:01:31+08:00
 draft: true
-tags: ["设备异常性检测"]
-categories: ["KeyAttestation"]
+tags: ["KeyAttestation"]
+categories: ["设备异常性检测"]
 ---
 
 结合github项目[KeyAttestation](https://github.com/vvb2060/KeyAttestation)来学习KeyAttestation原理
@@ -496,6 +496,9 @@ public AuthorizationList(ASN1Encodable asn1Encodable) throws CertificateParsingE
 如果密钥的用途包含签名，那么它可以对任意数据进行签名。这种情况下，持有该密钥的实体可以签名任何数据，包括认证证书自身 (tbsCertificate)。若如此，这个密钥生成的认证就没有任何实际的安全保证，因为任何人都可以在任意数据上应用该签名，伪装成合法的认证。签名的真实性无法被保障
 2. 认证用途 (KeyPurpose::ATTEST_KEY)：
 如果密钥用途被正确设定为仅用于认证 (KeyPurpose::ATTEST_KEY)，那么该密钥只能用于生成认证证书，而不能用于签名任意数据。在这种情况下，父证书可以证明子证书的密钥用途仅限于认证，从而确保子证书的可信度。这种可信度依赖于父证书的有效性，也就是根证书的可信度
+
+这里引入了认证的源头：根证书的可信度问题
+Andorid通过[Trusty TEE](https://source.android.com/docs/security/features/trusty?hl=zh-cn)完成证书的存储，TEE在硬件层面解决了安全性问题，其中类似RootOfTrust这类数据都是由厂商在设备出产时烧录到硬件存储当中的，从根本上解决了根密钥不可信的问题，并以此根密钥为信任链根，派生密钥
 
 ### 三. 总结
 可以利用KeyAttestation来做什么呢？
