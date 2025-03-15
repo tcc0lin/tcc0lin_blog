@@ -4,8 +4,11 @@ date: 2023-08-20T22:27:03+08:00
 # draft: true
 draft: false
 author: "tcc0lin"
-tags: ["frida源码编译"]
-categories: ["frida生态"]
+tags:
+    - frida
+    - 源码编译
+categories:
+    - hook框架
 ---
 
 ### 一、编译环境搭建

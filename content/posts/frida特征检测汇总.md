@@ -4,8 +4,11 @@ date: 2023-08-21T19:29:35+08:00
 # draft: true
 draft: false
 author: "tcc0lin"
-tags: ["frida特征对抗"]
-categories: ["frida生态"]
+tags:
+    - frida
+    - 对抗案例
+categories:
+    - hook框架
 ---
 
 - `端口检测`：frida默认暴露端口为27047

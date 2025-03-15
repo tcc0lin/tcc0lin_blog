@@ -3,8 +3,11 @@ title: "Frida源码阅读"
 date: 2023-03-12T13:37:48+08:00
 draft: true
 author: "tcc0lin"
-tags: ["源码分析"]
-categories: ["frida生态"]
+tags:
+    - frida
+    - 源码分析
+categories:
+    - hook框架
 ---
 
 以14.2.18版本为例

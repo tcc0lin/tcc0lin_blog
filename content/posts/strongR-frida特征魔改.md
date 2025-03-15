@@ -4,8 +4,11 @@ date: 2023-08-01T18:30:58+08:00
 # draft: true
 draft: false
 author: "tcc0lin"
-tags: ["frida特征魔改"]
-categories: ["frida生态"]
+tags:
+    - frida
+    - 魔改思路
+categories:
+    - hook框架
 ---
 ### 一、背景
 参考项目[strongR-frida](https://github.com/hluwa/Patchs/tree/master/strongR-frida/frida-core)对frida14.2.18进行魔改

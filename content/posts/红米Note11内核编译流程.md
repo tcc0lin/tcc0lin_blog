@@ -3,8 +3,10 @@ title: "红米Note11内核编译流程"
 date: 2023-06-30T23:50:17+08:00
 draft: false
 author: "tcc0lin"
-tags: ["内核编译"]
-categories: ["系统定制"]
+tags:
+    - 内核编译
+categories:
+    - 系统定制
 # toc: true
 # autoCollapseToc: true
 # math: true

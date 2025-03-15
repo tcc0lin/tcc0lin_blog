@@ -4,8 +4,6 @@ date: 2023-08-06T14:39:32+08:00
 # draft: true
 draft: false
 author: "tcc0lin"
-tags: ["maps特征"]
-categories: ["特征检测对抗"]
 ---
 
 ### 一、前言

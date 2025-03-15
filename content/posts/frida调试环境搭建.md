@@ -3,8 +3,11 @@ title: "Frida调试环境搭建"
 date: 2023-02-21T22:51:53+08:00
 draft: false
 author: "tcc0lin"
-tags: ["frida调试环境搭建"]
-categories: ["frida生态"]
+tags:
+    - frida
+    - 源码编译
+categories:
+    - hook框架
 ---
 
 ## 一、背景

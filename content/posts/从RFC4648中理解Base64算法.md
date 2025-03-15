@@ -3,8 +3,11 @@ title: "从RFC4648中理解Base64算法"
 date: 2023-05-09T22:36:47+08:00
 draft: false
 author: "tcc0lin"
-tags: ["Base64算法"]
-categories: ["加密算法研究"]
+tags:
+    - 摘要算法
+    - 源码分析
+categories:
+    - 算法研究
 # toc: true
 # autoCollapseToc: true
 # math: true

@@ -3,8 +3,11 @@ title: "Zygisk源码阅读"
 date: 2023-06-11T11:36:47+08:00
 draft: true
 author: "tcc0lin"
-tags: ["Zygisk","源码分析"]
-categories: ["Magisk生态"]
+tags:
+    - 源码分析
+    - zygisk
+categories:
+    - Magisk
 ---
 基于Magisk v25.0
 

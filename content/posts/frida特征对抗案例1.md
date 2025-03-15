@@ -4,8 +4,11 @@ date: 2023-08-18T22:43:19+08:00
 # draft: true
 draft: false
 author: "tcc0lin"
-tags: ["frida特征对抗"]
-categories: ["frida生态"]
+tags:
+    - frida
+    - 对抗案例
+categories:
+    - hook框架
 ---
 
 ### 一、资源准备

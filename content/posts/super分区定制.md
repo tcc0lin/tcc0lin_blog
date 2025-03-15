@@ -3,8 +3,8 @@ title: "Super分区定制"
 date: 2023-07-31T20:05:53+08:00
 draft: true
 author: "tcc0lin"
-tags: ["super分区定制"]
-categories: ["系统定制"]
+categories:
+    - 系统定制
 # toc: true
 # autoCollapseToc: true
 # math: true

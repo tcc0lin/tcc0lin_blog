@@ -3,8 +3,11 @@ title: "Zygisk-v27.0源码阅读"
 date: 2024-03-06T22:56:31+08:00
 draft: true
 author: "tcc0lin"
-tags: ["Zygisk","源码分析"]
-categories: ["Magisk生态"]
+tags:
+    - 源码分析
+    - zygisk
+categories:
+    - Magisk
 ---
 
 隔了很久再读Magisk源码中关于Zygisk的部分，上次翻源码还是v25.0，这次已经更新到了v27.0。粗略扫了眼，变化的地方还是挺多的，想搜索一下关键字也基本上搜索不到，懒得重新过一遍源码，既然是关于zygisk，那就以`(zygisk_enabled)`作为关键搜索词切入

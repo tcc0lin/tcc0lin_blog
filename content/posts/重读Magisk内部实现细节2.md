@@ -3,8 +3,10 @@ title: "重读Magisk内部实现细节2"
 date: 2023-06-11T11:36:47+08:00
 draft: false
 author: "tcc0lin"
-tags: ["Magisk","源码分析"]
-categories: ["Magisk生态"]
+tags:
+    - 源码分析
+categories:
+    - Magisk
 # toc: true
 # autoCollapseToc: true
 # math: true
