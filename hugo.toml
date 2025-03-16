@@ -393,7 +393,7 @@ enableEmoji = true
   # remember to set up your site subtitle by `params.header.subtitle.name`
   indexWithSubtitle = false
   # FixIt 0.3.13 | NEW whether to show summary in plain text
-  summaryPlainify = false
+  summaryPlainify = true
   # FixIt 0.2.14 | NEW FixIt will, by default, inject a theme meta tag in the HTML head on the home page only.
   # You can turn it off, but we would really appreciate if you don’t, as this is a good way to watch FixIt's popularity on the rise.
   disableThemeInject = false
@@ -1098,7 +1098,7 @@ enableEmoji = true
       endLevel = 6
     # FixIt 0.2.13 | NEW Display a message at the beginning of an article to warn the reader that its content might be expired
     [params.page.expirationReminder]
-      enable = false
+      enable = true
       # Display the reminder if the last modified time is more than 90 days ago
       reminder = 90
       # Display warning if the last modified time is more than 180 days ago
