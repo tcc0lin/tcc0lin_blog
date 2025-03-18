@@ -1144,7 +1144,7 @@ enableEmoji = true
       # FixIt 0.2.13 | NEW whether to show the edit button of the code wrapper
       edit = true
       # the maximum number of lines of displayed code by default
-      maxShownLines = 10
+      maxShownLines = 30
     # Mapbox GL JS config (https://docs.mapbox.com/mapbox-gl-js)
     [params.page.mapbox]
       # access token of Mapbox GL JS
